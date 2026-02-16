@@ -1,0 +1,15 @@
+services:
+  gear-finder:
+    build: .
+    container_name: gear-finder
+    # Pass the search query and flags as the command.
+    # Override at runtime:
+    #   docker compose run gear-finder "Sony 24-70 GM II"
+    #   docker compose run gear-finder "Leica M11-P" --sites keh mpb --json
+    #   docker compose run gear-finder --list-sites
+    command: ["--list-sites"]
+    # No persistent volumes needed for basic usage.
+    # Uncomment below if you add SQLite price history later:
+    # volumes:
+    #   - ./data:/app/data
+    restart: "no"
