@@ -122,7 +122,7 @@ gear-finder/
   browser_opener.py       # Browser tab opener fallback
   requirements.txt
   Dockerfile
-  docker-compose.yml
+  docker-compose.yaml
 ```
 
 All scrapers run in parallel using `concurrent.futures.ThreadPoolExecutor`. Each site has a 15-second timeout. If a scraper fails (site redesigned, down, etc.), it reports the error and continues with the others.
