@@ -2,14 +2,19 @@ services:
   gear-finder:
     build: .
     container_name: gear-finder
-    # Pass the search query and flags as the command.
-    # Override at runtime:
-    #   docker compose run gear-finder "Sony 24-70 GM II"
-    #   docker compose run gear-finder "Leica M11-P" --sites keh mpb --json
-    #   docker compose run gear-finder --list-sites
-    command: ["--list-sites"]
-    # No persistent volumes needed for basic usage.
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
     # Uncomment below if you add SQLite price history later:
     # volumes:
     #   - ./data:/app/data
+
+  # CLI mode — run ad-hoc searches from the command line:
+  #   docker compose run --rm gear-finder-cli "Sony 24-70 GM II"
+  #   docker compose run --rm gear-finder-cli "Leica M11-P" --sites keh mpb --json
+  #   docker compose run --rm gear-finder-cli --list-sites
+  gear-finder-cli:
+    build: .
+    entrypoint: ["python", "gear_finder.py"]
+    profiles: ["cli"]
     restart: "no"

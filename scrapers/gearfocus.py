@@ -51,6 +51,8 @@ class GearFocusScraper(BaseScraper):
                         condition=None,
                         url=full_url,
                         site=self.name,
+                        shipping="Set by seller",
+                        tax="Collected at checkout",
                     ))
                     if len(results) >= max_results:
                         break
@@ -87,6 +89,8 @@ class GearFocusScraper(BaseScraper):
                     condition=condition,
                     url=item_url,
                     site=self.name,
+                    shipping="Set by seller",
+                    tax="Collected at checkout",
                 ))
 
         return results[:max_results]

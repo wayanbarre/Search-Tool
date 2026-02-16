@@ -66,6 +66,8 @@ class FredMirandaScraper(BaseScraper):
                 condition=None,
                 url=full_url,
                 site=self.name,
+                shipping="Varies (peer-to-peer)",
+                tax="Not applicable (peer-to-peer)",
             ))
 
             if len(results) >= max_results:

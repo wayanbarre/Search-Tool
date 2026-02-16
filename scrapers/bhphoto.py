@@ -65,6 +65,8 @@ class BHPhotoScraper(BaseScraper):
                             condition="Used",
                             url=item_url,
                             site=self.name,
+                            shipping="Free shipping",
+                            tax="Collected at checkout",
                         ))
                 if results:
                     return results[:max_results]
@@ -105,6 +107,8 @@ class BHPhotoScraper(BaseScraper):
                     condition="Used",
                     url=item_url,
                     site=self.name,
+                    shipping="Free shipping",
+                    tax="Collected at checkout",
                 ))
 
         return results[:max_results]

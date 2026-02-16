@@ -63,6 +63,8 @@ class RedditScraper(BaseScraper):
                 url=post_url,
                 site=self.name,
                 posted_date=posted_date,
+                shipping="Varies (peer-to-peer)",
+                tax="Not applicable (peer-to-peer)",
             ))
 
             if len(results) >= max_results:

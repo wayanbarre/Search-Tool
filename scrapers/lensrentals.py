@@ -55,6 +55,8 @@ class LensRentalsScraper(BaseScraper):
                     condition="Ex-Rental",
                     url=full_url,
                     site=self.name,
+                    shipping="Calculated at checkout",
+                    tax="Collected at checkout",
                 ))
                 if len(results) >= max_results:
                     break
@@ -86,6 +88,8 @@ class LensRentalsScraper(BaseScraper):
                     condition="Ex-Rental",
                     url=item_url,
                     site=self.name,
+                    shipping="Calculated at checkout",
+                    tax="Collected at checkout",
                 ))
 
         return results[:max_results]

@@ -47,6 +47,8 @@ class MPBScraper(BaseScraper):
                             condition=None,
                             url=item_url if item_url.startswith('http') else f"https://www.mpb.com{item_url}",
                             site=self.name,
+                            shipping="Free shipping",
+                            tax="Collected at checkout",
                         ))
                     if results:
                         return results[:max_results]
@@ -84,6 +86,8 @@ class MPBScraper(BaseScraper):
                             condition=condition,
                             url=item_url,
                             site=self.name,
+                            shipping="Free shipping",
+                            tax="Collected at checkout",
                         ))
                 if results:
                     return results[:max_results]
@@ -131,6 +135,8 @@ class MPBScraper(BaseScraper):
                     condition=condition,
                     url=item_url,
                     site=self.name,
+                    shipping="Free shipping",
+                    tax="Collected at checkout",
                 ))
 
         return results[:max_results]

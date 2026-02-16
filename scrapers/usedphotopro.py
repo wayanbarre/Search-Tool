@@ -72,6 +72,8 @@ class UsedPhotoProScraper(BaseScraper):
                     condition=condition,
                     url=item_url,
                     site=self.name,
+                    shipping="Free shipping (orders $99+)",
+                    tax="Collected at checkout",
                 ))
 
             return results
@@ -112,6 +114,8 @@ class UsedPhotoProScraper(BaseScraper):
                     condition=None,
                     url=item_url,
                     site=self.name,
+                    shipping="Free shipping (orders $99+)",
+                    tax="Collected at checkout",
                 ))
 
         return results[:max_results]

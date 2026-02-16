@@ -31,6 +31,8 @@ class SearchResult:
     url: str
     site: str
     posted_date: Optional[str] = None
+    shipping: Optional[str] = None       # e.g. "Free Shipping", "$9.95", "Calculated at checkout"
+    tax: Optional[str] = None            # e.g. "Tax included", "Collected at checkout"
 
 
 def parse_price(text: str) -> tuple[Optional[str], Optional[float]]:

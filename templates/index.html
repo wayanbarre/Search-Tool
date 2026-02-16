@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gear Finder{% if query %} — {{ query }}{% endif %}</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #232733;
+      --border: #2e3345;
+      --text: #e4e6ed;
+      --text2: #9498a8;
+      --accent: #6c8cff;
+      --accent-hover: #8aa4ff;
+      --green: #4ade80;
+      --orange: #fb923c;
+      --red: #f87171;
+      --yellow: #facc15;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .logo span { color: var(--text2); font-weight: 400; }
+
+    /* Search form */
+    .search-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 1rem;
+    }
+    .search-section.hero { padding-top: 15vh; text-align: center; }
+    .hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .hero p { color: var(--text2); margin-bottom: 2rem; }
+    .search-form {
+      display: flex;
+      gap: 0.5rem;
+      max-width: 700px;
+    }
+    .hero .search-form { margin: 0 auto; }
+    .search-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text2); }
+    .search-btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { background: var(--accent-hover); }
+
+    /* Site filters */
+    .filters {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .filters-label { color: var(--text2); font-size: 0.8rem; margin-right: 0.25rem; }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.78rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+      color: var(--text2);
+    }
+    .filter-chip:hover { border-color: var(--accent); color: var(--text); }
+    .filter-chip input { display: none; }
+    .filter-chip.active { background: rgba(108,140,255,0.15); border-color: var(--accent); color: var(--accent); }
+
+    /* Results */
+    .results-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+    .summary {
+      color: var(--text2);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .summary strong { color: var(--text); }
+
+    /* Site group */
+    .site-group { margin-bottom: 1.5rem; }
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .site-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    .site-count {
+      font-size: 0.8rem;
+      color: var(--text2);
+      background: var(--surface2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+    }
+
+    /* Result card */
+    .result-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.6rem;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .result-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .result-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .result-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+      font-size: 0.85rem;
+    }
+    .meta-item { display: flex; align-items: center; gap: 0.3rem; }
+    .meta-label { color: var(--text2); }
+    .meta-value { font-weight: 500; }
+    .price-value { color: var(--green); font-size: 1rem; font-weight: 700; }
+    .condition-badge {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(108,140,255,0.15);
+      color: var(--accent);
+    }
+    .shipping-value { color: var(--text2); }
+    .shipping-free { color: var(--green); }
+    .tax-value { color: var(--text2); font-size: 0.8rem; }
+    .result-url {
+      display: block;
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--text2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .posted-date { color: var(--text2); font-size: 0.8rem; }
+    .visit-arrow {
+      float: right;
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin-top: -1.5rem;
+    }
+
+    /* Errors / no results */
+    .status-section { margin-top: 1.5rem; }
+    .no-results, .error-list {
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 0.5rem;
+    }
+    .error-list .error-site { color: var(--orange); }
+
+    /* Loading spinner */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,17,23,0.7);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .loading-text {
+      color: var(--text);
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+    .loading-inner { text-align: center; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .search-form { flex-direction: column; }
+      .search-btn { width: 100%; }
+      .result-meta { flex-direction: column; gap: 0.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">Gear Finder <span>/ used camera gear search</span></a>
+    </div>
+  </div>
+
+  {% if not query %}
+  <!-- Hero / landing -->
+  <div class="search-section hero">
+    <h1>Find used camera gear</h1>
+    <p>Search 9 marketplaces at once — KEH, MPB, Adorama, B&amp;H, Reddit, and more.</p>
+    <form class="search-form" method="get" action="/" id="searchForm">
+      <input class="search-input" type="text" name="q" placeholder="Sony 24-70 GM II, Leica M11, Canon RF 35mm..." autofocus required>
+      <button class="search-btn" type="submit">Search</button>
+    </form>
+    <div class="filters" style="max-width:700px;margin:0.75rem auto 0;">
+      <span class="filters-label">Sites:</span>
+      {% for s in all_sites %}
+      <label class="filter-chip" data-key="{{ s.key }}">
+        <input type="checkbox" name="site" value="{{ s.key }}">
+        {{ s.name }}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% else %}
+  <!-- Search bar (compact, top) -->
+  <div class="search-section">
+    <form class="search-form" method="get" action="/" id="searchForm">
+      <input class="search-input" type="text" name="q" value="{{ query }}" autofocus required>
+      <button class="search-btn" type="submit">Search</button>
+    </form>
+    <div class="filters">
+      <span class="filters-label">Sites:</span>
+      {% for s in all_sites %}
+      <label class="filter-chip{% if selected_sites and s.key in selected_sites %} active{% endif %}" data-key="{{ s.key }}">
+        <input type="checkbox" name="site" value="{{ s.key }}"{% if selected_sites and s.key in selected_sites %} checked{% endif %}>
+        {{ s.name }}
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-section">
+    <div class="summary">
+      Found <strong>{{ total_count }}</strong> result{{ 's' if total_count != 1 else '' }}
+      across <strong>{{ data.results_by_site | length }}</strong> site{{ 's' if data.results_by_site | length != 1 else '' }}
+      in {{ data.elapsed }}s
+      {% if data.total_sites != data.results_by_site | length %}
+        (searched {{ data.total_sites }})
+      {% endif %}
+    </div>
+
+    {% for site_name in ordered_site_names %}
+      {% if site_name in data.results_by_site %}
+      <div class="site-group">
+        <div class="site-header">
+          <span class="site-name">{{ site_name }}</span>
+          <span class="site-count">{{ data.results_by_site[site_name] | length }}</span>
+        </div>
+        {% for r in data.results_by_site[site_name] %}
+        <a class="result-card" href="{{ r.url }}" target="_blank" rel="noopener noreferrer">
+          <div class="result-title">{{ r.title }}</div>
+          <div class="result-meta">
+            {% if r.price %}
+            <div class="meta-item">
+              <span class="price-value">{{ r.price }}</span>
+            </div>
+            {% endif %}
+            {% if r.condition %}
+            <div class="meta-item">
+              <span class="condition-badge">{{ r.condition }}</span>
+            </div>
+            {% endif %}
+            {% if r.shipping %}
+            <div class="meta-item">
+              <span class="meta-label">Shipping:</span>
+              <span class="shipping-value{% if 'free' in r.shipping.lower() %} shipping-free{% endif %}">{{ r.shipping }}</span>
+            </div>
+            {% endif %}
+            {% if r.tax %}
+            <div class="meta-item">
+              <span class="meta-label">Tax:</span>
+              <span class="tax-value">{{ r.tax }}</span>
+            </div>
+            {% endif %}
+            {% if r.posted_date %}
+            <div class="meta-item">
+              <span class="posted-date">Posted {{ r.posted_date }}</span>
+            </div>
+            {% endif %}
+          </div>
+          <span class="result-url">{{ r.url }}</span>
+          <span class="visit-arrow">&#8599;</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Errors / no-results -->
+    {% if data.no_results or data.errors %}
+    <div class="status-section">
+      {% if data.no_results %}
+      <div class="no-results">No results on: {{ data.no_results | join(', ') }}</div>
+      {% endif %}
+      {% if data.errors %}
+      <div class="error-list">
+        Errors:
+        {% for site, err in data.errors.items() %}
+          <div><span class="error-site">{{ site }}:</span> {{ err }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-inner">
+      <div class="spinner"></div>
+      <div class="loading-text">Searching marketplaces...</div>
+    </div>
+  </div>
+
+  <script>
+    // Chip toggle logic
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', e => {
+        // Toggle is handled by the checkbox, just update styling
+        const cb = chip.querySelector('input[type="checkbox"]');
+        // Let the default toggle happen, then sync style
+        setTimeout(() => {
+          chip.classList.toggle('active', cb.checked);
+        }, 0);
+      });
+    });
+
+    // On form submit: inject selected sites as a hidden field + show spinner
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      // Remove any previously injected hidden inputs
+      this.querySelectorAll('input[name="sites"]').forEach(el => el.remove());
+
+      const checked = document.querySelectorAll('.filter-chip input:checked');
+      if (checked.length > 0) {
+        const keys = Array.from(checked).map(cb => cb.value).join(',');
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'sites';
+        hidden.value = keys;
+        this.appendChild(hidden);
+      }
+
+      // Remove individual "site" params from submission
+      document.querySelectorAll('.filter-chip input').forEach(cb => { cb.name = ''; });
+
+      document.getElementById('loadingOverlay').classList.add('active');
+    });
+  </script>
+
+</body>
+</html>

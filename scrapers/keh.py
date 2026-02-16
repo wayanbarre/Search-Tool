@@ -68,6 +68,8 @@ class KEHScraper(BaseScraper):
                     condition=condition,
                     url=full_url,
                     site=self.name,
+                    shipping="Free shipping (orders $49+)",
+                    tax="Collected at checkout",
                 ))
                 if len(results) >= max_results:
                     break
@@ -105,6 +107,8 @@ class KEHScraper(BaseScraper):
                     condition=condition,
                     url=item_url,
                     site=self.name,
+                    shipping="Free shipping (orders $49+)",
+                    tax="Collected at checkout",
                 ))
 
         return results

@@ -1,38 +1,68 @@
 # Gear Finder
 
-CLI tool that searches multiple used camera gear marketplaces simultaneously and returns aggregated results.
+Search multiple used camera gear marketplaces simultaneously. Comes with a **web UI** and a **CLI** — deploy on your NAS via Docker.
 
 ## Supported Sites
 
-| Key            | Site                    | Notes                              |
-|----------------|-------------------------|------------------------------------|
-| `keh`          | KEH Camera              | Largest US used camera store       |
-| `mpb`          | MPB                     | Global platform, condition ratings |
-| `fredmiranda`  | Fred Miranda Buy/Sell   | Community forum, [S]/[FS] tags     |
-| `usedphotopro` | UsedPhotoPro            | Roberts Camera, Shopify-based      |
-| `reddit`       | Reddit r/photomarket    | JSON API, [S] selling posts        |
-| `gearfocus`    | GearFocus               | Creator-to-creator marketplace     |
-| `adorama`      | Adorama Used            | Condition grades E+ through X      |
-| `bhphoto`      | B&H Photo Used          | 90-day warranty                    |
-| `lensrentals`  | LensRentals             | Ex-rental pro gear                 |
+| Key            | Site                    | Shipping                     | Notes                              |
+|----------------|-------------------------|------------------------------|------------------------------------|
+| `keh`          | KEH Camera              | Free (orders $49+)           | Largest US used camera store       |
+| `mpb`          | MPB                     | Free                         | Global platform, condition ratings |
+| `fredmiranda`  | Fred Miranda Buy/Sell   | Varies (peer-to-peer)        | Community forum, [S]/[FS] tags     |
+| `usedphotopro` | UsedPhotoPro            | Free (orders $99+)           | Roberts Camera, Shopify-based      |
+| `reddit`       | Reddit r/photomarket    | Varies (peer-to-peer)        | JSON API, [S] selling posts        |
+| `gearfocus`    | GearFocus               | Set by seller                | Creator-to-creator marketplace     |
+| `adorama`      | Adorama Used            | Free standard                | Condition grades E+ through X      |
+| `bhphoto`      | B&H Photo Used          | Free                         | 90-day warranty                    |
+| `lensrentals`  | LensRentals             | Calculated at checkout       | Ex-rental pro gear                 |
+
+## Quick Start (Docker on NAS)
+
+```bash
+git clone <repo-url> && cd gear-finder
+docker compose up -d
+```
+
+Open **http://your-nas-ip:5000** in a browser. That's it.
 
 ## Installation
+
+### Docker (recommended for NAS)
+
+```bash
+docker compose build
+docker compose up -d          # Web UI on port 5000
+```
 
 ### Local (Python)
 
 ```bash
 pip install -r requirements.txt
-```
-
-### Docker
-
-```bash
-docker compose build
+python web_app.py             # Web UI at http://localhost:5000
 ```
 
 ## Usage
 
-### Local
+### Web UI
+
+Navigate to `http://localhost:5000` (or your NAS IP). Type a search query, optionally filter by site, and click Search. Each result shows:
+
+- **Price** — listing price
+- **Condition** — site-specific grade (EX+, Like New, etc.)
+- **Shipping** — free shipping, calculated, varies by seller
+- **Tax** — collected at checkout (US sales tax) or N/A for peer-to-peer
+
+Click any result to go directly to the listing on the source website.
+
+### Web API
+
+```
+GET /api/search?q=Sony+24-70+GM+II&sites=keh,mpb&max=5
+```
+
+Returns JSON for scripting/integration.
+
+### CLI
 
 ```bash
 # Search all sites
@@ -57,59 +87,26 @@ python gear_finder.py --list-sites
 python gear_finder.py "Fuji X100VI" --max 5
 ```
 
-### Docker
+### Docker CLI
 
 ```bash
-# Search all sites
-docker compose run --rm gear-finder "Sony 24-70 GM II"
-
-# Search specific sites
-docker compose run --rm gear-finder "Leica M11-P" --sites keh mpb
-
-# JSON output
-docker compose run --rm gear-finder "Sony 70-200 GM II" --json
-
-# List sites
-docker compose run --rm gear-finder --list-sites
-```
-
-Note: `--open` and `--browse-only` are not available inside Docker containers since there is no browser.
-
-## Output Example
-
-```
-Searching 9 sites for: Sony 24-70 GM II
-
---- KEH Camera (3 results) ---
-
-  Sony FE 24-70mm f/2.8 GM II  —  $1,549  (EX+)
-  https://www.keh.com/shop/sony-fe-24-70mm-...
-
-  Sony FE 24-70mm f/2.8 GM II  —  $1,449  (BGN)
-  https://www.keh.com/shop/sony-fe-24-70mm-...
-
---- MPB (2 results) ---
-
-  Sony FE 24-70mm f/2.8 GM II  —  $1,499  (Excellent)
-  https://www.mpb.com/en-us/product/...
-
---- Reddit r/photomarket (1 result) ---
-
-  [S] Sony 24-70 GM II - mint, box  —  $1,400  [2025-01-15]
-  https://www.reddit.com/r/photomarket/...
-
-Found 14 total results across 7 sites in 4.2s
-No results on: LensRentals, GearFocus
+# Ad-hoc CLI searches (uses the "cli" profile)
+docker compose run --rm gear-finder-cli "Sony 24-70 GM II"
+docker compose run --rm gear-finder-cli "Leica M11-P" --sites keh mpb --json
+docker compose run --rm gear-finder-cli --list-sites
 ```
 
 ## Architecture
 
 ```
 gear-finder/
-  gear_finder.py          # Main CLI entry point
+  gear_finder.py          # CLI entry point
+  web_app.py              # Flask web UI + JSON API
+  templates/
+    index.html            # Search page (dark theme, responsive)
   scrapers/
     __init__.py
-    base.py               # Base scraper class + SearchResult dataclass
+    base.py               # BaseScraper + SearchResult dataclass
     keh.py                # KEH Camera
     mpb.py                # MPB
     fredmiranda.py        # Fred Miranda Buy/Sell
@@ -119,18 +116,20 @@ gear-finder/
     adorama.py            # Adorama Used
     bhphoto.py            # B&H Photo Used
     lensrentals.py        # LensRentals Buy
-  browser_opener.py       # Browser tab opener fallback
+  browser_opener.py       # Browser tab opener (CLI fallback)
   requirements.txt
   Dockerfile
   docker-compose.yaml
 ```
 
-All scrapers run in parallel using `concurrent.futures.ThreadPoolExecutor`. Each site has a 15-second timeout. If a scraper fails (site redesigned, down, etc.), it reports the error and continues with the others.
+All scrapers run in parallel using `concurrent.futures.ThreadPoolExecutor`. Each site has a 15-second timeout. If a scraper fails, it reports the error and continues with the others.
 
 ## Notes
 
-- No Selenium or headless browsers — scraping uses `requests` + `BeautifulSoup` only
-- `--browse-only` works with zero dependencies (stdlib `webbrowser` module)
+- No Selenium or headless browsers — uses `requests` + `BeautifulSoup` only
+- Results include price, condition, shipping, and tax info per listing
+- Each result is a direct link to the listing on the source site
 - Scrapers may break as sites update their HTML/APIs — the tool degrades gracefully
 - Reddit scraper uses the public JSON API (no auth required)
 - UsedPhotoPro uses Shopify's JSON search endpoint
+- Web UI uses a single-page dark theme, works on mobile
